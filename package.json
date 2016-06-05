@@ -1,0 +1,40 @@
+{
+  "name": "b-1",
+  "author": {
+    "name": "LordEidi from SwordLord - the coding crew",
+    "email": "<lordeidi@swordlord.com>",
+    "url": "http://swordlord.com/"
+  },
+  "description": "B-1 is the broker backend for S-1 sensors",
+  "keywords": [
+    "sensor",
+    "temperature",
+    "messagequeue",
+    "iot"
+  ],
+  "license": "AGPL-3.0",
+  "version": "0.2.0-beta",
+  "main": "b-1.js",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/LordEidi/b-1/issues"
+  },
+  "scripts": {
+    "test": "tape test/*.js | faucet"
+  },
+  "homepage": "https://github.com/LordEidi/b-1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LordEidi/b-1.git"
+  },
+  "dependencies": {
+    "crossroads": "^0.12.2",
+    "log4js": "^0.6.31",
+    "moment": "^2.13.0",
+    "sequelize": "^3.3.2",
+    "sqlite3": "^3.0.8"
+  },
+  "devDependencies": {
+    "tape": "^4.0.1"
+  }
+}
