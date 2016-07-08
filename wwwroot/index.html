@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Basic Page Needs
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta charset="utf-8">
+    <title>B-1</title>
+    <meta name="description" content="B-1, backend for S-1 sensors">
+    <meta name="author" content="LordEidi, SwordLord - the coding crew">
+
+    <!-- Mobile Specific Metas
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- CSS
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="stylesheet" href="/s/css/normalize.css">
+    <link rel="stylesheet" href="/s/css/skeleton.css">
+    <link rel="stylesheet" href="/s/css/c3.min.css">
+    <link rel="stylesheet" href="/s/css/b1.css">
+
+    <!-- Load c3.css -->
+    <link href="/s/css/c3.css" rel="stylesheet" type="text/css">
+
+    <!-- Load d3.js and c3.js -->
+    <script src="/s/js/jquery.min.js" charset="utf-8"></script>
+    <script src="/s/js/d3.min.js" charset="utf-8"></script>
+    <script src="/s/js/c3.min.js" charset="utf-8"></script>
+
+    <!-- Favicon
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <link rel="icon" type="image/png" href="/s/favicon.ico">
+
+    <!-- Event Binding
+    –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <script>
+        $(document).ready(function(){
+            refreshOverview();
+
+            // UI Commands   ––––––––––––––––––––––––
+            $("#btn_overview").click(function(){
+                refreshOverview();
+                $("#div_overview").show();
+                $("#div_votes").hide();
+                $("#div_functions").hide();
+            });
+
+            // Commands for Backend    –––––––––––––––
+            $("#btn_adddemodata").click(function(){
+                sendAddDemoData();
+            });
+        });
+    </script>
+</head>
+<body>
+
+<!-- Alert / Info Box
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+<div id="notification" style="display: none;">
+    <span id="notificationmsg">Hey, This is my Message.</span>
+</div>
+
+<!-- Page Layout
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+<div class="section get-help">
+    <div class="container">
+        <h3 class="section-heading">B-1</h3>
+    </div>
+</div>
+
+<div class="navbar-spacer"></div>
+<nav class="navbar">
+    <div class="container">
+        <ul class="navbar-list">
+            <li class="navbar-item"><a class="navbar-link" id="btn_overview">Overview</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- OVERVIEW
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+<div class="container" id="div_overview">
+    <div class="row">
+        <div class="twelve column">
+            <h4>Temperature of sensor 'balcony'</h4>
+            <p>Temperature values for the last few hours</p>
+            <div id="chartSingleTemp"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="one-half column">
+            <h4>Temperature of sensors</h4>
+            <p>Temperature values for the last few hours</p>
+            <div id="chartTemp"></div>
+        </div>
+        <div class="one-half column">
+            <h4>Useful functions</h4>
+            <p>Some helpers during dev</p>
+            <div id="chartActivePJ"></div>
+            <button class="button" id="btn_adddemodata">Add Demo Data</button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts
+–––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+<script type="text/javascript">
+
+    function refreshOverview()
+    {
+        var chartTemp = c3.generate({
+            data: {
+                x: 'dates',
+                xFormat: '%Y-%m-%dT%H:%M:%S',
+                url: '/d/g///p3m',
+                mimeType: 'json'
+            },
+            bindto: d3.select('#chartTemp'),
+            axis: {
+                x: {
+                    type: 'timeseries',
+                    tick: {
+                        format: '%d.%m.%Y %I:%M:%S'
+                    }
+                }
+            }
+        });
+
+        var chartTemp = c3.generate({
+            data: {
+                x: 'dates',
+                xFormat: '%Y-%m-%dT%H:%M:%S',
+                url: '/d/g/8921368_1458400/0/p1m',
+                mimeType: 'json'
+            },
+            bindto: d3.select('#chartSingleTemp'),
+            axis: {
+                x: {
+                    type: 'timeseries',
+                    tick: {
+                        format: '%d.%m.%Y %I:%M:%S',
+                        culling: {
+                            max: 4 // the number of tick texts will be adjusted to less than this value
+                        }
+                    }
+
+                }
+            }
+        });
+
+
+
+
+    }
+
+    function sendAddDemoData()
+    {
+        $.getJSON( "/fn/add_demo_data", function( data ) {
+
+            showResponse(data);
+        });
+    }
+
+    function showResponse(response)
+    {
+        if(response.exitCode === -1)
+        {
+            $("#notification").css('background-color','#fb0044');
+        }
+        else
+        {
+            $("#notification").css('background-color','#35a1fb');
+        }
+
+        $("#notificationmsg").text(response.info + ": " + response.programOutput);
+        $("#notification").fadeIn("slow").delay(2000).fadeOut();
+
+    }
+    /*
+    setTimeout(function () {
+        chart.groups([['data1', 'data2', 'data3']])
+    }, 1000);
+
+    setTimeout(function () {
+        chart.load({
+            columns: [['data4', 100, -50, 150, 200, -300, -100]]
+        });
+    }, 1500);
+
+    setTimeout(function () {
+        chart.groups([['data1', 'data2', 'data3', 'data4']])
+    }, 2000);
+*/
+</script>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

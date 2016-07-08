@@ -46,7 +46,8 @@ var sequelize = new Sequelize(config.db_name, config.db_uid, config.db_pwd, {
 var SENSOR = sequelize.define('sensor', {
     sensorId: { type: Sequelize.STRING, allowNull: false, unique: true, primaryKey: true},
     lastSeen: { type: Sequelize.DATE, allowNull: false, defaultValue: Sequelize.NOW },
-    type: { type: Sequelize.INTEGER, allowNull: false, defaultValue: 1 }
+    type: { type: Sequelize.INTEGER, allowNull: false, defaultValue: 1 },
+    name: { type: Sequelize.STRING, allowNull: true}
 });
 
 var SENSORDATA = sequelize.define('sensordata', {
@@ -55,7 +56,8 @@ var SENSORDATA = sequelize.define('sensordata', {
     value: { type: Sequelize.FLOAT, allowNull: false}
 });
 
-SENSORDATA.belongsTo(SENSOR, {foreignKey: 'sensorId', as: 'Sensor'});
+SENSORDATA.belongsTo(SENSOR, {foreignKey: 'sensorId', as: 'sensor'});
+SENSOR.hasMany(SENSORDATA, {foreignKey: 'sensorId', as: 'sensordata'});
 
 sequelize.sync().then(function()
     {

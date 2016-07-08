@@ -33,7 +33,7 @@ var config = require('../config').config;
 var SENSOR = require('./db').SENSOR;
 var SENSORDATA = require('./db').SENSORDATA;
 
-// pj sends ballot
+// s1 sends sensor data
 function storeSensorData(req, res, deviceId, sensorId, key, value)
 {
     if(deviceId == undefined || deviceId == null || sensorId == undefined || sensorId == null
@@ -48,7 +48,9 @@ function storeSensorData(req, res, deviceId, sensorId, key, value)
     //var key = key.replace(/[^0-9]/gi, '');
     //var val = value.replace(/[^0-9]/gi, '');
 
-    SENSOR.findOrCreate({where: {sensorId: sensorId} })
+    var id = deviceId + ":" + sensorId;
+
+    SENSOR.findOrCreate({where: {sensorId: id} })
         .spread( function(sensor, created) {
 
             SENSORDATA.create({ key: key, value: value }, { }).then(function(sensorData) {
@@ -67,9 +69,15 @@ function storeSensorData(req, res, deviceId, sensorId, key, value)
             // console.log(created)
         });
 
-    res.writeHead(202, {'Content-Type': 'text/plain'});
-    res.write("Data accepted: " + sensorId + " {" + key + ":" + value + "}");
-    res.end();
+    res.writeHead(200, {'Content-Type': 'application/json'});
+
+    var json = JSON.stringify({
+        info: {'status': 'Data accepted', 'id': id, 'key': key, 'value': value},
+        exitCode: 0,
+        programOutput: 'Data stored'
+    });
+
+    res.end(json);
 }
 
 // url to be processed is unknown

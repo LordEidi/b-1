@@ -39,8 +39,8 @@ var url = require('url');
 var fs = require('fs');
 
 var handler = require('./libs/handler');
-// var stats = require('./libs/stats');
-// var fncts = require('./libs/functions');
+var stats = require('./libs/stats');
+var fncts = require('./libs/functions');
 
 function onRedirectToRoot(req, res, path)
 {
@@ -97,15 +97,45 @@ function onGetStaticContent(req, res, url)
     }
 }
 
-function onGetSensorData(req, res, deviceId, sensorId, key, value)
+
+function onExecFunction(req, res, fnct, param1, param2, param3, param4)
+{
+    log.info('Exec Function: ' + fnct);
+
+    switch (fnct) {
+        case "add_demo_data":
+            fncts.addDemoDataToDB(res);
+            break;
+        default:
+            log.error("This function type is unknown: " + fnct + ".");
+
+            res.writeHead(200, {'Content-Type': 'application/json'});
+
+            var json = JSON.stringify({
+                info: path,
+                exitCode: -1,
+                programOutput: 'fnct unknown'
+            });
+
+            res.end(json);
+    }
+}
+
+function onSetSensorData(req, res, deviceId, sensorId, key, value)
 {
     handler.storeSensorData(req, res, deviceId, sensorId, key, value)
 }
 
-// -----------------------------------------------------------------------------
-crossroads.addRoute('/d/{deviceId}/{sensorId}/{key}/{value}', onGetSensorData);
+function onGetSensorData(req, res, deviceId, sensorId, duration)
+{
+    stats.readSensorData(req, res, deviceId, sensorId, duration)
+}
 
-//crossroads.addRoute('/fn/{fnct}/:param1:/:param2:/:param3:/:param4:', onExecFunction);
+// -----------------------------------------------------------------------------
+crossroads.addRoute('/d/s/{deviceId}/{sensorId}/{key}/{value}', onSetSensorData);
+crossroads.addRoute('/d/g/:deviceId:/:sensorId:/:duration:', onGetSensorData);
+
+crossroads.addRoute('/fn/{fnct}/:param1:/:param2:/:param3:/:param4:', onExecFunction);
 
 crossroads.addRoute('/s/{url*}', onGetStaticContent);
 
@@ -130,6 +160,14 @@ process.on('uncaughtException', function(err)
 server.listen(config.port, config.ip);
 
 log.info("Server running at http://" + config.ip + ":" + config.port + "/");
+log.debug("--");
 log.debug("Load the B-1 dashboard at that url: http://" + config.ip + ":" + config.port + "/");
-log.debug("Send S-1 data at that url: http://" + config.ip + ":" + config.port + "/d/deviceId/sensorId/key/value");
-log.debug("Send S-1 data like this example: http://" + config.ip + ":" + config.port + "/d/9128341/sensor2/temperature/15.8");
+log.debug("--");
+log.debug("Send S-1 data at that url: http://" + config.ip + ":" + config.port + "/d/s/deviceId/sensorId/key/value");
+log.debug("Send S-1 data like this example: http://" + config.ip + ":" + config.port + "/d/s/9128341/sensor2/temperature/15.8");
+log.debug("--");
+log.debug("Send S-1 data from that url: http://" + config.ip + ":" + config.port + "/d/g/deviceId/sensorId/optional_ISO_8601_duration");
+log.debug("Send S-1 data like this example: http://" + config.ip + ":" + config.port + "/d/g/9128341/sensor2/p3dt");
+log.debug("--");
+log.debug("Trigger creation of demo data: http://" + config.ip + ":" + config.port + "/fn/add_demo_data");
+log.debug("--");
